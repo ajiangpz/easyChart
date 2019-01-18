@@ -23,7 +23,7 @@ function getData() {
     }]
 }
 window.onload = function () {
-    let myBar = new barChart('bar', '600px', '600px');
+    let myBar = new barChart('bar');
     myBar.importData(['name', 'value', 'age'], getData())
     myBar.extend({
         series: {

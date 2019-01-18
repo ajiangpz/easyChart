@@ -11,14 +11,21 @@ import {
 import {
     set
 } from "./set";
+import {
+    debounce
+} from "./debounce"
 //chart是父构造函数，包含一些基本的属性，通用的方法
 function chart(el, width, height) {
     this.el = document.getElementById(el);
-    this.width = width || "400px";
+    let _this = this
+    this.width = width || "100%";
     this.height = height || "600px";
     this.el.style.width = this.width;
     this.el.style.height = this.height;
     this.chart = echarts.init(this.el);
+    window.addEventListener('resize', debounce(function () {
+        _this.chart.resize();
+    }, 1000))
     this.options = {}
 }
 chart.prototype.draw = function () {
