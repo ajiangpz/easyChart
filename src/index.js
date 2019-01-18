@@ -29,12 +29,13 @@ window.onload = function () {
         series: {
             label: {
                 show: true,
-                position: "inside"
+                position: "top"
             }
         }
     })
-    // myBar.settings() {
-
-    // }
+    myBar.settings({
+        barGap: '-100%',
+        opacity: 0.5
+    })
     myBar.draw()
 }

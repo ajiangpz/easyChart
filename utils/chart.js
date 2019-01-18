@@ -8,6 +8,9 @@ import 'echarts/lib/component/dataset'
 import {
     setExtend
 } from "./extend";
+import {
+    set
+} from "./set";
 //chart是父构造函数，包含一些基本的属性，通用的方法
 function chart(el, width, height) {
     this.el = document.getElementById(el);
@@ -24,15 +27,15 @@ chart.prototype.draw = function () {
 chart.prototype.importData = function (columns, rows) {
     this.options.dataset.dimensions = columns;
     this.options.dataset.source = rows;
-    var _this = this;
-    columns.forEach(function (item, index) {
-        if (index) {
-            _this.options.series.push({
-                type: _this.type,
-                name: item
-            })
-        }
-    })
+    // var _this = this;
+    // columns.forEach(function (item, index) {
+    //     if (index) {
+    //         _this.options.series.push({
+    //             type: _this.type,
+    //             name: item
+    //         })
+    //     }
+    // })
 };
 barChart.prototype = Object.create(chart.prototype)
 barChart.prototype.constructor = barChart;
@@ -47,6 +50,40 @@ barChart.prototype.constructor = barChart;
 chart.prototype.extend = function (options) {
     setExtend(this.options, options);
 };
+barChart.prototype.settings = function (settings) {
+    this.setBarseries(settings)
+}
+barChart.prototype.setBarseries = function (settings) {
+    const {
+        barGap,
+        opacity
+    } = settings
+    let series = []
+    let seriesTemp = {}
+    let metrics = this.options.dataset.dimensions.slice(1)
+    metrics.forEach(item => {
+        seriesTemp[item] = []
+    })
+    this.options.dataset.source.forEach(row => {
+        metrics.forEach(item => {
+            seriesTemp[item].push(row[item])
+        })
+    })
+    series = Object.keys(seriesTemp).map(item => {
+        let seriesItem = {
+            name: item,
+            type: 'bar'
+        }
+        if (barGap) {
+            seriesItem.barGap = barGap
+        }
+        if (opacity) {
+            set(seriesItem, 'itemStyle.normal.opacity', opacity)
+        }
+        return seriesItem
+    })
+    this.options.series = series;
+}
 export function barChart(el, width, height) {
     chart.call(this, el, width, height);
     this.type = "bar"
