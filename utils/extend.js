@@ -5,7 +5,6 @@ import {
 import {
     isObject
 } from './isObject.js'
-console.log(Object.prototype.toString.call(isObject))
 export function setExtend(options, extend) {
     Object.keys(extend).forEach((attr) => {
         const value = extend[attr]

@@ -28,22 +28,7 @@ function chart(el, width, height) {
     }, 1000))
     this.options = {}
 }
-chart.prototype.draw = function () {
-    this.chart.setOption(this.options);
-};
-chart.prototype.importData = function (columns, rows) {
-    this.options.dataset.dimensions = columns;
-    this.options.dataset.source = rows;
-    // var _this = this;
-    // columns.forEach(function (item, index) {
-    //     if (index) {
-    //         _this.options.series.push({
-    //             type: _this.type,
-    //             name: item
-    //         })
-    //     }
-    // })
-};
+
 barChart.prototype = Object.create(chart.prototype)
 barChart.prototype.constructor = barChart;
 //继承:通过 new 一个父构造函数,可以产生一个实例对象，且该对象的__proto__指向构造函数的原型
@@ -54,12 +39,6 @@ barChart.prototype.constructor = barChart;
 //fn.prototype=parent.prototype 然后再让 child.prototype=new fn();
 //那么child 的原型会指向 fn的原型，而 fn 的原型指向 parent 的原型
 //以上所述，可以用Object.create()来实现....
-chart.prototype.extend = function (options) {
-    setExtend(this.options, options);
-};
-barChart.prototype.settings = function (settings) {
-    this.setBarseries(settings)
-}
 barChart.prototype.setBarseries = function (settings) {
     const {
         barGap,
@@ -91,9 +70,19 @@ barChart.prototype.setBarseries = function (settings) {
     })
     this.options.series = series;
 }
-export function barChart(el, width, height) {
+export function barChart(arg) {
+    console.log(arguments[0])
+    const {
+        el,
+        width,
+        height,
+        columns,
+        rows,
+        settings,
+        extend
+    } = arguments[0]
     chart.call(this, el, width, height);
-    this.type = "bar"
+
     this.options = {
         title: {
             text: "ECharts 入门示例"
@@ -103,11 +92,14 @@ export function barChart(el, width, height) {
         },
         tooltip: {},
         dataset: {
-            dimensions: [],
-            source: []
+            dimensions: columns || [],
+            source: rows || []
         },
         legend: {},
         yAxis: {},
         series: []
     };
+    this.setBarseries(settings || {})
+    setExtend(this.options, extend || {});
+    this.chart.setOption(this.options);
 }

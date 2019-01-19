@@ -1,7 +1,6 @@
 export function debounce(fn, delay) {
     var timer = null
     return function () {
-        console.log(+new Date())
         clearTimeout(timer)
         timer = setTimeout(function () {
             fn.call(this)
