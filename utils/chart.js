@@ -5,6 +5,7 @@ import "echarts/lib/component/tooltip";
 import "echarts/lib/component/legend"
 import "echarts/lib/component/title";
 import 'echarts/lib/component/dataset'
+import 'echarts/lib/component/dataZoom'
 import {
     setExtend
 } from "./extend";
@@ -15,20 +16,58 @@ import {
     debounce
 } from "./debounce"
 //chart是父构造函数，包含一些基本的属性，通用的方法
-function chart(el, width, height) {
+function chart(arg) {
+    const {
+        el,
+        width = '100%',
+        height = '600px'
+    } = arg
     this.el = document.getElementById(el);
     let _this = this
-    this.width = width || "100%";
-    this.height = height || "600px";
-    this.el.style.width = this.width;
-    this.el.style.height = this.height;
+    this.el.style.width = width;
+    this.el.style.height = height;
     this.chart = echarts.init(this.el);
     window.addEventListener('resize', debounce(function () {
         _this.chart.resize();
     }, 1000))
-    this.options = {}
-}
+    this.options = {
+        dataset: {
+            dimensions: [],
+            source: []
+        },
+        xAxis: {
+            type: 'category'
+        },
+        legend: {},
+        yAxis: {},
+        series: []
+    }
 
+}
+chart.prototype.drawChart = function (arg) {
+    this.ECHART_SETTINGS = [
+        'grid', 'dataZoom', 'visualMap',
+        'toolbox', 'title', 'legend',
+        'xAxis', 'yAxis', 'radar',
+        'tooltip', 'axisPointer', 'brush',
+        'geo', 'timeline', 'graphic',
+        'series', 'backgroundColor', 'textStyle'
+    ]
+    const {
+        rows,
+        columns,
+        extend = {}
+    } = arg
+    this.options.dataset.dimensions = columns;
+    this.options.dataset.source = rows;
+    setExtend(this.options, extend);
+    this.ECHART_SETTINGS.forEach(setting => {
+        if (arg[setting]) {
+            this.options[setting] = arg[setting]
+        }
+    })
+    this.chart.setOption(this.options);
+}
 barChart.prototype = Object.create(chart.prototype)
 barChart.prototype.constructor = barChart;
 //继承:通过 new 一个父构造函数,可以产生一个实例对象，且该对象的__proto__指向构造函数的原型
@@ -42,15 +81,17 @@ barChart.prototype.constructor = barChart;
 barChart.prototype.setBarseries = function (settings) {
     const {
         barGap,
-        opacity
+        opacity,
+        rows,
+        columns,
     } = settings
     let series = []
     let seriesTemp = {}
-    let metrics = this.options.dataset.dimensions.slice(1)
+    let metrics = columns.slice(1)
     metrics.forEach(item => {
         seriesTemp[item] = []
     })
-    this.options.dataset.source.forEach(row => {
+    rows.forEach(row => {
         metrics.forEach(item => {
             seriesTemp[item].push(row[item])
         })
@@ -71,35 +112,7 @@ barChart.prototype.setBarseries = function (settings) {
     this.options.series = series;
 }
 export function barChart(arg) {
-    console.log(arguments[0])
-    const {
-        el,
-        width,
-        height,
-        columns,
-        rows,
-        settings,
-        extend
-    } = arguments[0]
-    chart.call(this, el, width, height);
-
-    this.options = {
-        title: {
-            text: "ECharts 入门示例"
-        },
-        xAxis: {
-            type: 'category'
-        },
-        tooltip: {},
-        dataset: {
-            dimensions: columns || [],
-            source: rows || []
-        },
-        legend: {},
-        yAxis: {},
-        series: []
-    };
-    this.setBarseries(settings || {})
-    setExtend(this.options, extend || {});
-    this.chart.setOption(this.options);
+    chart.call(this, arg);
+    this.setBarseries(arg)
+    this.drawChart(arg)
 }
